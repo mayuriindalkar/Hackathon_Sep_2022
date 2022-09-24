@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPEED TYPING TEST</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="wrapper">
+        <input type="text" class="input-field">
+        <div class="content-box">
+            <div class="typing-text">
+                <p id="paragraph"></p>
+            </div>
+            <div class="content">
+                <ul class="result-details">
+                    <li class="time">
+                        <p>
+                            Time Left:
+                        </p>
+                        <span><b>60</b>s</span>
+                    </li>
+                    <li class="mistake">
+                        <p>
+                            Mistakes:
+                        </p>
+                        <span>0</span>
+                    </li>
+                    <li class="wpm">
+                        <p>
+                            WPM:
+                        </p>
+                        <span>0</span>
+                    </li>
+                    <li class="cpm">
+                        <p>
+                            CPM:
+                        </p>
+                        <span>0</span>
+                    </li>
+                </ul>
+                <button>Try Again</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const paragraphs = [
+            "Count your life by smiles, not tears. Count your age by friends, not years. Happy birthday, Your birthday is the first day of another 365-day journey. Be the shining thread in the beautiful tapestry of the world to make this year the best ever. Enjoy the ride, Happy birthday to one of the few people whose birthday I can remember without a Facebook reminder.",
+            "Inspiration comes from within yourself. One has to be positive. When you're positive, good things happen, To live a fulfilled life, we need to keep creating the 'what is next', of our lives. Without dreams and goals there is no living, only merely existing, and that is not why we are here, What lies behind you and what lies in front of you, pales in comparison to what lies inside of you.",
+            "Memories of our lives, of our works and our deeds will continue in others, Life is like riding a bicycle. To keep your balance, you must keep moving, You are never too old to set another goal or to dream a new dream, Some people look for a beautiful place. Others make a place beautiful.",
+            "You make a life out of what you have, not what you're missing, At first people refuse to believe that a strange new thing can be done, then they begin to hope it can be done, then they see it can be don then it is done and all the world wonders why it was not done centuries ago, That is one good thing about this world there are always sure to be more springs."
+        ];
+
+        const typingText = document.querySelector(".typing-text p")
+        const inpField = document.querySelector(".wrapper .input-field")
+        const tryAgainBtn = document.querySelector(".content button")
+        const timeTag = document.querySelector(".time span b")
+        const mistakeTag = document.querySelector(".mistake span")
+        const wpmTag = document.querySelector(".wpm span")
+        const cpmTag = document.querySelector(".cpm span")
+
+        let timer;
+        let maxTime = 60;
+        let timeLeft = maxTime;
+        let charIndex = mistakes = isTyping = 0;
+
+        function loadParagraph() {
+            const ranIndex = Math.floor(Math.random() * paragraphs.length);
+            typingText.innerHTML = "";
+            paragraphs[ranIndex].split("").forEach(char => {
+                console.log(char);
+                let span = `<span>${char}</span>`
+                typingText.innerHTML += span;
+            });
+            typingText.querySelectorAll("span")[0].classList.add("active");
+            document.addEventListener("keydown", () => inpField.focus());
+            typingText.addEventListener("click", () => inpField.focus());
+        }
+
+        function initTyping() {
+            let characters = typingText.querySelectorAll("span");
+            let typedChar = inpField.value.split("")[charIndex];
+            if (charIndex < characters.length - 1 && timeLeft > 0) {
+                if (!isTyping) {
+                    timer = setInterval(initTimer, 1000);
+                    isTyping = true;
+                }
+                if (typedChar == null) {
+                    if (charIndex > 0) {
+                        charIndex--;
+                        if (characters[charIndex].classList.contains("incorrect")) {
+                            mistakes--;
+                        }
+                        characters[charIndex].classList.remove("correct", "incorrect");
+                    }
+                } else {
+                    if (characters[charIndex].innerText == typedChar) {
+                        characters[charIndex].classList.add("correct");
+                    } else {
+                        mistakes++;
+                        characters[charIndex].classList.add("incorrect");
+                    }
+                    charIndex++;
+                }
+                characters.forEach(span => span.classList.remove("active"));
+                characters[charIndex].classList.add("active");
+
+                let wpm = Math.round(((charIndex - mistakes) / 5) / (maxTime - timeLeft) * 60);
+                wpm = wpm < 0 || !wpm || wpm === Infinity ? 0: wpm;
+
+                wpmTag.innerText = wpm;
+                mistakeTag.innerText = mistakes;
+                cpmTag.innerText = charIndex - mistakes;
+            } else {
+                clearInterval(timer);
+                inpField.value = "";
+            }
+        }
+
+        function initTimer() {
+            if (timeLeft > 0) {
+                timeLeft--;
+                timeTag.innerText = timeLeft;
+                let wpm = Math.round(((charIndex - mistakes) / 5) / (maxTime - timeLeft) * 60);
+                wpmTag.innerText = wpm;
+            } else {
+                clearInterval(timer);
+            }
+        }
+
+        function resetGame() {
+            loadParagraph();
+            clearInterval(timer);
+            timeLeft = maxTime;
+            charIndex = mistakes = isTyping = 0;
+            inpField.value = "";
+            timeTag.innerText = timeLeft;
+            wpmTag.innerText = 0;
+            mistakeTag.innerText = 0;
+            cpmTag.innerText = 0;
+        }
+        loadParagraph();
+        inpField.addEventListener("input", initTyping);
+        tryAgainBtn.addEventListener("click", resetGame);
+    </script>
+</body>
+</html>
